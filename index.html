@@ -192,7 +192,7 @@
     // [LOGIKA LOGIN NISN & MEMBKA FORM]
     // -------------------------------------------------------------------------
 
-    async function handleLogin(e) {
+  async function handleLogin(e) {
       e.preventDefault();
       const nisn = document.getElementById('inputNISN').value.trim();
       const targetUrl = document.getElementById('inputUrlSoal').value.trim();
@@ -202,6 +202,9 @@
       try {
         const response = await fetch(GAS_URL, {
           method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8" // Menambahkan header ini agar aman dari CORS
+          },
           body: JSON.stringify({ action: "login", nisn: nisn })
         });
         const res = await response.json();
