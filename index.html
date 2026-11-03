@@ -200,10 +200,10 @@
       if (!targetUrl) return alert("Mohon Scan QR atau Tempelkan Link Google Form Soal terlebih dahulu!");
 
       try {
-        const response = await fetch(GAS_URL, {
+       const response = await fetch(GAS_URL, {
           method: "POST",
           headers: {
-            "Content-Type": "text/plain;charset=utf-8" // Menambahkan header ini agar aman dari CORS
+            "Content-Type": "text/plain;charset=utf-8"
           },
           body: JSON.stringify({ action: "login", nisn: nisn })
         });
