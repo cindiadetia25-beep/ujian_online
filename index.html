@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Ujian Google Form Anti-Nyontek</title>
+
+  <!-- ========================================================================= -->
+  <!-- [LIBRARY EXTERNAL]                                                        -->
+  <!-- ========================================================================= -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <!-- ========================================================================= -->
+  <!-- [STYLING TEMA: PUTIH, KUNING, BIRU & BLOKIR SELECT TEKS]                  -->
+  <!-- ========================================================================= -->
+  <style>
+    body {
+      background-color: #F8FAFC;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+  </style>
+</head>
+<body class="font-sans text-gray-800">
+
+  <div id="app" class="min-h-screen flex flex-col justify-between">
+    
+    <!-- ======================================================================= -->
+    <!-- [HEADER APPLIKASI]                                                      -->
+    <!-- ======================================================================= -->
+    <header class="bg-blue-900 text-white p-4 shadow-md flex justify-between items-center border-b-4 border-yellow-400">
+      <h1 class="text-xl font-bold flex items-center gap-2">
+        <span class="bg-yellow-400 text-blue-900 px-2 py-0.5 rounded text-xs font-black">EXAM</span>
+        Portal Wadah Google Form
+      </h1>
+      <div id="userInfo" class="hidden text-sm text-right">
+        <p id="dispNama" class="font-bold text-yellow-300"></p>
+        <p id="dispNISN" class="text-xs text-blue-200"></p>
+      </div>
+    </header>
+
+    <!-- ======================================================================= -->
+    <!-- [HALAMAN LOGIN & INPUT FORM]                                            -->
+    <!-- ======================================================================= -->
+    <main class="flex-grow flex items-center justify-center p-2 sm:p-4">
+      
+      <div id="viewLogin" class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-blue-900">Masuk Ujian</h2>
+          <p class="text-xs text-gray-500 mt-1">Scan QR / Tempel Link Form & Masukkan NISN Anda</p>
+        </div>
+
+        <!-- Tombol Input Link / Scan QR -->
+        <div class="space-y-3 mb-6">
+          <button onclick="openScanner()" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-medium py-2.5 px-4 rounded-xl text-sm flex justify-center items-center gap-2">
+            📷 Pindai QR Soal
+          </button>
+          
+          <button onclick="toggleLinkInput()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-semibold py-2.5 px-4 rounded-xl text-sm flex justify-center items-center gap-2">
+            🔗 Tempel Link Google Form
+          </button>
+
+          <label class="w-full bg-white border-2 border-blue-800 text-blue-900 hover:bg-blue-50 font-medium py-2 px-4 rounded-xl text-sm cursor-pointer flex justify-center items-center gap-2">
+            📁 Upload Gambar QR
+            <input type="file" accept="image/*" class="hidden" onchange="handleQRUpload(event)">
+          </label>
+        </div>
+
+        <!-- Input Link Form (Hidden) -->
+        <div id="boxLinkSoal" class="hidden mb-4">
+          <input type="text" id="inputUrlSoal" placeholder="https://docs.google.com/forms/d/e/..." class="w-full p-3 border rounded-xl text-sm focus:ring-2 focus:ring-blue-800">
+        </div>
+
+        <!-- Container Kamera QR Scanner -->
+        <div id="reader" class="hidden w-full rounded-lg overflow-hidden border mb-4"></div>
+
+        <hr class="my-4 border-gray-200">
+
+        <!-- Form Validation NISN -->
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase text-gray-600 mb-1">NISN Siswa</label>
+            <input type="number" id="inputNISN" required placeholder="Masukkan NISN" class="w-full p-3 border rounded-xl font-medium focus:ring-2 focus:ring-yellow-400">
+          </div>
+          <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-3 rounded-xl shadow transition">
+            BUKA SOAL UJIAN
+          </button>
+        </form>
+      </div>
+
+      <!-- ======================================================================= -->
+      <!-- [WADAH TERKUNCI TEMPAT MEMBUKA GOOGLE FORM]                            -->
+      <!-- ======================================================================= -->
+      <div id="viewExam" class="hidden w-full h-[85vh] flex flex-col bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        
+        <div class="bg-red-100 border-b border-red-300 text-red-700 px-4 py-2 text-xs flex justify-between items-center">
+          <span>⚠️ <b>SISTEM DIKUNCI:</b> Dilarang keluar tab/aplikasi. Pelanggaran: <b id="cheatCount">0</b>/3</span>
+          <button onclick="requestFullScreen()" class="bg-red-600 text-white px-2 py-1 rounded text-[10px]">Fullscreen</button>
+        </div>
+
+        <!-- Frame Tempat Menampilkan Google Form -->
+        <iframe id="formIframe" class="w-full h-full border-none" src=""></iframe>
+      </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-center p-3 text-xs text-gray-400 bg-white border-t">
+      &copy; 2026 Wadah Secure Google Form
+    </footer>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- [LOGIKA JAVASCRIPT & ANTI NYONTEK]                                        -->
+  <!-- ========================================================================= -->
+  <script>
+    // PASTE URL WEB APP APPS SCRIPT KAMU DI SINI
+    const GAS_URL = "URL_APPS_SCRIPT_ANDA_DI_SINI";
+
+    let currentUser = null;
+    let pelanggaranCount = 0;
+
+    // -------------------------------------------------------------------------
+    // [LOGIKA ANTI-NYONTEK: BLOKIR SHORTCUT & DETEKSI PINDAH TAB]
+    // -------------------------------------------------------------------------
+    
+    window.addEventListener('blur', () => {
+      if (currentUser && !document.getElementById('viewExam').classList.contains('hidden')) {
+        pelanggaranCount++;
+        document.getElementById('cheatCount').innerText = pelanggaranCount;
+        
+        // Simpan log kecurangan ke Google Sheets
+        fetch(GAS_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "logCheat", user: currentUser, pelanggaran: pelanggaranCount })
+        });
+
+        alert(`PERINGATAN KECURANGAN #${pelanggaranCount}!\n\nAnda terdeteksi meninggalkan layar pengerjaan ujian!`);
+        
+        if (pelanggaranCount >= 3) {
+          alert("Batas toleransi pelanggaran habis!");
+        }
+      }
+    });
+
+    // Disable Klik Kanan
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    function requestFullScreen() {
+      let elem = document.documentElement;
+      if (elem.requestFullscreen) elem.requestFullscreen();
+    }
+
+    // -------------------------------------------------------------------------
+    // [LOGIKA INPUT LINK & SCAN QR]
+    // -------------------------------------------------------------------------
+
+    function toggleLinkInput() {
+      document.getElementById('boxLinkSoal').classList.toggle('hidden');
+    }
+
+    function openScanner() {
+      const readerElem = document.getElementById('reader');
+      readerElem.classList.remove('hidden');
+      const html5QrcodeScanner = new Html5Qrcode("reader");
+      html5QrcodeScanner.start(
+        { facingMode: "environment" }, 
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+          document.getElementById('inputUrlSoal').value = decodedText;
+          html5QrcodeScanner.stop();
+          readerElem.classList.add('hidden');
+          alert("QR Code Berhasil Dipindai!");
+        }
+      );
+    }
+
+    function handleQRUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.scanFile(file, true)
+        .then(decodedText => {
+          document.getElementById('inputUrlSoal').value = decodedText;
+          alert("QR Code Berhasil Dibaca dari File!");
+        })
+        .catch(() => alert("Gagal membaca QR Code dari file gambar ini."));
+    }
+
+    // -------------------------------------------------------------------------
+    // [LOGIKA LOGIN NISN & MEMBKA FORM]
+    // -------------------------------------------------------------------------
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const nisn = document.getElementById('inputNISN').value.trim();
+      const targetUrl = document.getElementById('inputUrlSoal').value.trim();
+
+      if (!targetUrl) return alert("Mohon Scan QR atau Tempelkan Link Google Form Soal terlebih dahulu!");
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "login", nisn: nisn })
+        });
+        const res = await response.json();
+
+        if (res.success) {
+          currentUser = res.user;
+          document.getElementById('dispNama').innerText = currentUser.nama;
+          document.getElementById('dispNISN').innerText = "NISN: " + currentUser.nisn;
+          document.getElementById('userInfo').classList.remove('hidden');
+
+          // Muat Google Form ke iframe & aktifkan Fullscreen
+          document.getElementById('formIframe').src = targetUrl;
+          document.getElementById('viewLogin').classList.add('hidden');
+          document.getElementById('viewExam').classList.remove('hidden');
+          requestFullScreen();
+        } else {
+          alert(res.message);
+        }
+      } catch (err) {
+        alert("Gagal terhubung ke server database.");
+      }
+    }
+  </script>
+</body>
+</html>
