@@ -27,7 +27,7 @@
   <div id="app" class="min-h-screen flex flex-col justify-between">
     
     <!-- ======================================================================= -->
-    <!-- [HEADER APPLIKASI]                                                      -->
+    <!-- [HEADER APLIKASI]                                                      -->
     <!-- ======================================================================= -->
     <header class="bg-blue-900 text-white p-4 shadow-md flex justify-between items-center border-b-4 border-yellow-400">
       <h1 class="text-xl font-bold flex items-center gap-2">
@@ -100,7 +100,7 @@
         </div>
 
         <!-- Frame Tempat Menampilkan Google Form -->
-        <iframe id="formIframe" class="w-full h-full border-none" src=""></iframe>
+        <iframe id="formIframe" class="w-full h-full border-none" src="" allow="autoplay"></iframe>
       </div>
 
     </main>
@@ -112,20 +112,21 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- [LOGIKA JAVASCRIPT & ANTI NYONTEK]                                        -->
+  <!-- [LOGIKA JAVASCRIPT & ANTI NYONTEK SINKRON]                                -->
   <!-- ========================================================================= -->
   <script>
-    // PASTE URL WEB APP APPS SCRIPT KAMU DI SINI
     const GAS_URL = "https://script.google.com/macros/s/AKfycbyX49eWMMYAq5-Wb8syBPspweE8YgjpwccQS26GcNiwjhePmx4HxgKtU--XpB8mTDAI/exec";
 
     let currentUser = null;
     let pelanggaranCount = 0;
+    let html5QrcodeScanner = null;
 
     // -------------------------------------------------------------------------
-    // [LOGIKA ANTI-NYONTEK: BLOKIR SHORTCUT & DETEKSI PINDAH TAB]
+    // [1. DETEKSI PINDAH TAB / APLIKASI - HANYA AKTIF SAAT UJIAN]
     // -------------------------------------------------------------------------
     
     window.addEventListener('blur', () => {
+      // Pastikan hanya terdeteksi jika siswa SUDAH masuk ke halaman ujian
       if (currentUser && !document.getElementById('viewExam').classList.contains('hidden')) {
         pelanggaranCount++;
         document.getElementById('cheatCount').innerText = pelanggaranCount;
@@ -133,8 +134,9 @@
         // Simpan log kecurangan ke Google Sheets
         fetch(GAS_URL, {
           method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ action: "logCheat", user: currentUser, pelanggaran: pelanggaranCount })
-        });
+        }).catch(e => console.log(e));
 
         alert(`PERINGATAN KECURANGAN #${pelanggaranCount}!\n\nAnda terdeteksi meninggalkan layar pengerjaan ujian!`);
         
@@ -150,57 +152,89 @@
     function requestFullScreen() {
       let elem = document.documentElement;
       if (elem.requestFullscreen) elem.requestFullscreen();
+      else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+    }
+
+    // Helper untuk konversi URL Google Form agar bisa dibuka di iframe
+    function formatGoogleFormUrl(rawUrl) {
+      let url = rawUrl.trim();
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      
+      // Ubah URL edit / viewform biasa agar menyertakan embedded=true
+      if (url.includes('docs.google.com/forms')) {
+        if (url.includes('embedded=true')) return url;
+        if (url.includes('viewform')) {
+          return url + (url.includes('?') ? '&embedded=true' : '?embedded=true');
+        }
+        if (url.includes('/edit')) {
+          return url.replace(/\/edit.*$/, '/viewform?embedded=true');
+        }
+        return url + '?embedded=true';
+      }
+      return url;
     }
 
     // -------------------------------------------------------------------------
-    // [LOGIKA INPUT LINK & SCAN QR]
+    // [2. LOGIKA INPUT LINK & SCAN QR CODE]
     // -------------------------------------------------------------------------
 
     function toggleLinkInput() {
       document.getElementById('boxLinkSoal').classList.toggle('hidden');
     }
 
-    function openScanner() {
+    async function openScanner() {
       const readerElem = document.getElementById('reader');
       readerElem.classList.remove('hidden');
-      const html5QrcodeScanner = new Html5Qrcode("reader");
+
+      if (html5QrcodeScanner) {
+        try { await html5QrcodeScanner.stop(); } catch(e) {}
+      }
+
+      html5QrcodeScanner = new Html5Qrcode("reader");
       html5QrcodeScanner.start(
         { facingMode: "environment" }, 
-        { fps: 10, qrbox: 250 },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => {
           document.getElementById('inputUrlSoal').value = decodedText;
-          html5QrcodeScanner.stop();
-          readerElem.classList.add('hidden');
-          alert("QR Code Berhasil Dipindai!");
-        }
-      );
+          html5QrcodeScanner.stop().then(() => {
+            readerElem.classList.add('hidden');
+            alert("QR Code Berhasil Dipindai!");
+          });
+        },
+        (errorMessage) => {}
+      ).catch(err => alert("Kamera tidak dapat diakses atau diizinkan."));
     }
 
     function handleQRUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
+      
       const html5QrCode = new Html5Qrcode("reader");
       html5QrCode.scanFile(file, true)
         .then(decodedText => {
           document.getElementById('inputUrlSoal').value = decodedText;
           alert("QR Code Berhasil Dibaca dari File!");
         })
-        .catch(() => alert("Gagal membaca QR Code dari file gambar ini."));
+        .catch(() => alert("Gagal membaca QR Code dari gambar ini. Pastikan gambar QR jelas."));
     }
 
     // -------------------------------------------------------------------------
-    // [LOGIKA LOGIN NISN & MEMBKA FORM]
+    // [3. LOGIKA LOGIN NISN & MEMBUKA FORM]
     // -------------------------------------------------------------------------
 
-  async function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
       const nisn = document.getElementById('inputNISN').value.trim();
-      const targetUrl = document.getElementById('inputUrlSoal').value.trim();
+      const rawUrl = document.getElementById('inputUrlSoal').value.trim();
 
-      if (!targetUrl) return alert("Mohon Scan QR atau Tempelkan Link Google Form Soal terlebih dahulu!");
+      if (!rawUrl) return alert("Mohon Scan QR atau Tempelkan Link Google Form Soal terlebih dahulu!");
+
+      const formattedUrl = formatGoogleFormUrl(rawUrl);
 
       try {
-       const response = await fetch(GAS_URL, {
+        const response = await fetch(GAS_URL, {
           method: "POST",
           headers: {
             "Content-Type": "text/plain;charset=utf-8"
@@ -215,16 +249,17 @@
           document.getElementById('dispNISN').innerText = "NISN: " + currentUser.nisn;
           document.getElementById('userInfo').classList.remove('hidden');
 
-          // Muat Google Form ke iframe & aktifkan Fullscreen
-          document.getElementById('formIframe').src = targetUrl;
+          // Masukkan URL Google Form yang terformat ke iframe
+          document.getElementById('formIframe').src = formattedUrl;
           document.getElementById('viewLogin').classList.add('hidden');
           document.getElementById('viewExam').classList.remove('hidden');
+          
           requestFullScreen();
         } else {
           alert(res.message);
         }
       } catch (err) {
-        alert("Gagal terhubung ke server database.");
+        alert("Gagal terhubung ke server database. Periksa koneksi internet.");
       }
     }
   </script>
