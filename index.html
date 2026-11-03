@@ -249,14 +249,22 @@
     function handleQRUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
-      
+
       const html5QrCode = new Html5Qrcode("reader");
+      
+      // Menggunakan scanFileV2 / scanFile dengan penanganan penyesuaian gambar
       html5QrCode.scanFile(file, true)
         .then(decodedText => {
           document.getElementById('inputUrlSoal').value = decodedText;
+          // Tampilkan input link jika belum terbuka
+          document.getElementById('boxLinkSoal').classList.remove('hidden');
           alert("QR Code Berhasil Dibaca dari File!");
+          html5QrCode.clear();
         })
-        .catch(() => alert("Gagal membaca QR Code dari gambar ini. Pastikan gambar QR jelas."));
+        .catch(err => {
+          alert("Gagal membaca QR Code dari gambar ini.\n\nTips:\n1. Pastikan gambar QR terlihat jelas & fokus.\n2. Potong (crop) bagian QR Code saja.\n3. Atau gunakan opsi 'Tempel Link Google Form'.");
+          html5QrCode.clear();
+        });
     }
 
     // -------------------------------------------------------------------------
