@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Ujian Google Form Anti-Nyontek</title>
+  <title>PORTAL UJIAN SEKOLAH</title>
 
   <!-- ========================================================================= -->
   <!-- [LIBRARY EXTERNAL]                                                        -->
@@ -12,9 +12,13 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <!-- ========================================================================= -->
-  <!-- [STYLING TEMA: PUTIH, KUNING, BIRU & BLOKIR SELECT TEKS]                  -->
+  <!-- [STYLING TEMA: COURIER NEW BOLD & BLOKIR SELEKSI TEKS]                     -->
   <!-- ========================================================================= -->
   <style>
+    * {
+      font-family: 'Courier New', Courier, monospace !important;
+      font-weight: 700 !important;
+    }
     body {
       background-color: #F8FAFC;
       user-select: none;
@@ -22,17 +26,17 @@
     }
   </style>
 </head>
-<body class="font-sans text-gray-800">
+<body class="text-gray-800">
 
   <div id="app" class="min-h-screen flex flex-col justify-between">
     
     <!-- ======================================================================= -->
-    <!-- [HEADER APLIKASI]                                                      -->
+    <!-- [HEADER APLIKASI - JUDUL KAPITAL]                                       -->
     <!-- ======================================================================= -->
     <header class="bg-blue-900 text-white p-4 shadow-md flex justify-between items-center border-b-4 border-yellow-400">
-      <h1 class="text-xl font-bold flex items-center gap-2">
+      <h1 class="text-xl font-bold flex items-center gap-2 tracking-wide">
         <span class="bg-yellow-400 text-blue-900 px-2 py-0.5 rounded text-xs font-black">EXAM</span>
-        Portal Wadah Google Form
+        PORTAL UJIAN SEKOLAH
       </h1>
       <div id="userInfo" class="hidden text-sm text-right">
         <p id="dispNama" class="font-bold text-yellow-300"></p>
@@ -47,21 +51,21 @@
       
       <div id="viewLogin" class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
         <div class="text-center mb-6">
-          <h2 class="text-2xl font-bold text-blue-900">Masuk Ujian</h2>
+          <h2 class="text-2xl font-bold text-blue-900">MASUK UJIAN</h2>
           <p class="text-xs text-gray-500 mt-1">Scan QR / Tempel Link Form & Masukkan NISN Anda</p>
         </div>
 
         <!-- Tombol Input Link / Scan QR -->
         <div class="space-y-3 mb-6">
-          <button onclick="openScanner()" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-medium py-2.5 px-4 rounded-xl text-sm flex justify-center items-center gap-2">
+          <button onclick="openScanner()" class="w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-2.5 px-4 rounded-xl text-sm flex justify-center items-center gap-2">
             📷 Pindai QR Soal
           </button>
           
-          <button onclick="toggleLinkInput()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-semibold py-2.5 px-4 rounded-xl text-sm flex justify-center items-center gap-2">
+          <button onclick="toggleLinkInput()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-2.5 px-4 rounded-xl text-sm flex justify-center items-center gap-2">
             🔗 Tempel Link Google Form
           </button>
 
-          <label class="w-full bg-white border-2 border-blue-800 text-blue-900 hover:bg-blue-50 font-medium py-2 px-4 rounded-xl text-sm cursor-pointer flex justify-center items-center gap-2">
+          <label class="w-full bg-white border-2 border-blue-800 text-blue-900 hover:bg-blue-50 font-bold py-2 px-4 rounded-xl text-sm cursor-pointer flex justify-center items-center gap-2">
             📁 Upload Gambar QR
             <input type="file" accept="image/*" class="hidden" onchange="handleQRUpload(event)">
           </label>
@@ -80,8 +84,8 @@
         <!-- Form Validation NISN -->
         <form onsubmit="handleLogin(event)" class="space-y-4">
           <div>
-            <label class="block text-xs font-bold uppercase text-gray-600 mb-1">NISN Siswa</label>
-            <input type="number" id="inputNISN" required placeholder="Masukkan NISN" class="w-full p-3 border rounded-xl font-medium focus:ring-2 focus:ring-yellow-400">
+            <label class="block text-xs font-bold uppercase text-gray-600 mb-1">NISN SISWA</label>
+            <input type="number" id="inputNISN" required placeholder="Masukkan NISN" class="w-full p-3 border rounded-xl font-bold focus:ring-2 focus:ring-yellow-400">
           </div>
           <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-3 rounded-xl shadow transition">
             BUKA SOAL UJIAN
@@ -92,11 +96,11 @@
       <!-- ======================================================================= -->
       <!-- [WADAH TERKUNCI TEMPAT MEMBUKA GOOGLE FORM]                            -->
       <!-- ======================================================================= -->
-      <div id="viewExam" class="hidden w-full h-[85vh] flex flex-col bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <div id="viewExam" class="hidden w-full h-[88vh] flex flex-col bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         
         <div class="bg-red-100 border-b border-red-300 text-red-700 px-4 py-2 text-xs flex justify-between items-center">
-          <span>⚠️ <b>SISTEM DIKUNCI:</b> Dilarang keluar tab/aplikasi. Pelanggaran: <b id="cheatCount">0</b>/3</span>
-          <button onclick="requestFullScreen()" class="bg-red-600 text-white px-2 py-1 rounded text-[10px]">Fullscreen</button>
+          <span>⚠️ <b>SISTEM DIKUNCI:</b> DILARANG KELUAR TAB / WINDOW! PELANGGARAN: <b id="cheatCount">0</b>/3</span>
+          <span class="bg-red-600 text-white px-2 py-0.5 rounded text-[10px]">STATUS: AKTIF</span>
         </div>
 
         <!-- Frame Tempat Menampilkan Google Form -->
@@ -107,62 +111,97 @@
 
     <!-- FOOTER -->
     <footer class="text-center p-3 text-xs text-gray-400 bg-white border-t">
-      &copy; 2026 Wadah Secure Google Form
+      &copy; 2026 PORTAL UJIAN SEKOLAH
     </footer>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- [LOGIKA JAVASCRIPT & ANTI NYONTEK SINKRON]                                -->
+  <!-- [LOGIKA JAVASCRIPT & PENGUNCIAN TAB]                                      -->
   <!-- ========================================================================= -->
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwtjMiBnsEKe5Ja1ZlNjgFbK4JupKOYqrFEh8hFPf-_sd7RVA3vaXSx8uw0h0zdyb8A/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyX49eWMMYAq5-Wb8syBPspweE8YgjpwccQS26GcNiwjhePmx4HxgKtU--XpB8mTDAI/exec";
 
     let currentUser = null;
     let pelanggaranCount = 0;
     let html5QrcodeScanner = null;
+    let isExamActive = false;
 
     // -------------------------------------------------------------------------
-    // [1. DETEKSI PINDAH TAB / APLIKASI - HANYA AKTIF SAAT UJIAN]
+    // [1. DETEKSI KELUAR TAB / LEWAT BATAS PELANGGARAN -> AUTO RESET]
     // -------------------------------------------------------------------------
     
+    // Mencegah Siswa Me-refresh / Menutup Tab Web Ujian
+    window.addEventListener('beforeunload', (e) => {
+      if (isExamActive) {
+        e.preventDefault();
+        e.returnValue = 'Ujian sedang berlangsung! Anda tidak diperbolehkan keluar dari halaman ini.';
+        return e.returnValue;
+      }
+    });
+
+    // Deteksi Pindah Tab / Pindah Aplikasi (Blur Event)
     window.addEventListener('blur', () => {
-      // Pastikan hanya terdeteksi jika siswa SUDAH masuk ke halaman ujian
-      if (currentUser && !document.getElementById('viewExam').classList.contains('hidden')) {
+      if (isExamActive) {
         pelanggaranCount++;
         document.getElementById('cheatCount').innerText = pelanggaranCount;
         
-        // Simpan log kecurangan ke Google Sheets
+        // Simpan Log Pelanggaran ke Google Sheets
         fetch(GAS_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ action: "logCheat", user: currentUser, pelanggaran: pelanggaranCount })
         }).catch(e => console.log(e));
 
-        alert(`PERINGATAN KECURANGAN #${pelanggaranCount}!\n\nAnda terdeteksi meninggalkan layar pengerjaan ujian!`);
-        
-        if (pelanggaranCount >= 3) {
-          alert("Batas toleransi pelanggaran habis!");
+        // Jika Pelanggaran Lebih Dari 3x (Mencapai 4x atau lebih) -> OTOMATIS Mengulang ke Halaman Awal
+        if (pelanggaranCount > 3) {
+          alert("AKSES DIBATALKAN!\n\nAnda telah keluar dari layar pengerjaan lebih dari 3 kali. Sistem secara otomatis mengembalikan Anda ke halaman awal.");
+          resetToLogin();
+          return;
         }
+
+        alert(`PERINGATAN KECURANGAN #${pelanggaranCount}!\n\nAnda terdeteksi keluar dari tab pengerjaan ujian!\nMaksimal toleransi: 3 kali.`);
       }
     });
 
-    // Disable Klik Kanan
-    document.addEventListener('contextmenu', event => event.preventDefault());
-
-    function requestFullScreen() {
-      let elem = document.documentElement;
-      if (elem.requestFullscreen) elem.requestFullscreen();
-      else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+    // Reset total ke tampilan login awal
+    function resetToLogin() {
+      isExamActive = false;
+      currentUser = null;
+      pelanggaranCount = 0;
+      
+      document.getElementById('formIframe').src = "";
+      document.getElementById('cheatCount').innerText = "0";
+      document.getElementById('userInfo').classList.add('hidden');
+      document.getElementById('viewExam').classList.add('hidden');
+      document.getElementById('viewLogin').classList.remove('hidden');
+      document.getElementById('inputNISN').value = "";
     }
 
-    // Helper untuk konversi URL Google Form agar bisa dibuka di iframe
+    // Pemblokiran Klik Kanan & Tombol Pintasan Navigasi Keyboard
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    document.addEventListener('keydown', function (e) {
+      if (!isExamActive) return;
+
+      // Blokir F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+W, Ctrl+N, Ctrl+T, Alt+Tab
+      if (
+        e.keyCode === 123 || 
+        (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || 
+        (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 87 || e.keyCode === 78 || e.keyCode === 84)) ||
+        (e.altKey && e.keyCode === 9)
+      ) {
+        e.preventDefault();
+        alert("Pintasan keyboard ini dilarang selama pengerjaan ujian!");
+      }
+    });
+
+    // Format URL Google Form ke mode Embedded
     function formatGoogleFormUrl(rawUrl) {
       let url = rawUrl.trim();
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = 'https://' + url;
       }
       
-      // Ubah URL edit / viewform biasa agar menyertakan embedded=true
       if (url.includes('docs.google.com/forms')) {
         if (url.includes('embedded=true')) return url;
         if (url.includes('viewform')) {
@@ -245,21 +284,20 @@
 
         if (res.success) {
           currentUser = res.user;
+          isExamActive = true;
+
           document.getElementById('dispNama').innerText = currentUser.nama;
           document.getElementById('dispNISN').innerText = "NISN: " + currentUser.nisn;
           document.getElementById('userInfo').classList.remove('hidden');
 
-          // Masukkan URL Google Form yang terformat ke iframe
           document.getElementById('formIframe').src = formattedUrl;
           document.getElementById('viewLogin').classList.add('hidden');
           document.getElementById('viewExam').classList.remove('hidden');
-          
-          requestFullScreen();
         } else {
           alert(res.message);
         }
       } catch (err) {
-        alert("Gagal terhubung ke server database. Periksa koneksi internet.");
+        alert("Gagal terhubung ke server database. Periksa koneksi internet Anda.");
       }
     }
   </script>
